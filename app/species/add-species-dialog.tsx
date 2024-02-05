@@ -23,9 +23,6 @@ import { useState, type BaseSyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-// We use zod (z) to define a schema for the "Add species" form.
-// zod handles validation of the input values with methods like .string(), .nullable(). It also processes the form inputs with .transform() before the inputs are sent to the database.
-
 // Define kingdom enum for use in Zod schema and displaying dropdown options in the form
 const kingdoms = z.enum(["Animalia", "Plantae", "Fungi", "Protista", "Archaea", "Bacteria"]);
 
@@ -79,6 +76,29 @@ export default function AddSpeciesDialog({ userId }: { userId: string }) {
 
   // Control open/closed state of the dialog
   const [open, setOpen] = useState<boolean>(false);
+
+  // Control value from input form (too lazy to throw value in a form)
+  const [query, setQuery] = useState<string>("");
+
+  // fetch from wikimedia and update form values
+  const queryResults = async () => {
+    try {
+      await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}?redirect=true`)
+        .then((res) => res.json() as Promise<any>)
+        .then((data) => {
+          console.log(data);
+          // tslint:disable-next-line
+          form.setValue("image", data.thumbnail.source);
+          form.setValue("description", data.description);
+        });
+    } catch (err) {
+      return toast({
+        title: "Something went wrong.",
+        description: "We couldn't find a Wikipedia article matching your search!",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Instantiate form functionality with React Hook Form, passing in the Zod schema (for validation) and default values
   const form = useForm<FormData>({
@@ -143,6 +163,18 @@ export default function AddSpeciesDialog({ userId }: { userId: string }) {
           <DialogDescription>
             Add a new species here. Click &quot;Add Species&quot; below when you&apos;re done.
           </DialogDescription>
+          {/* Search functionality */}
+          <div className="flex justify-between">
+            <Input
+              placeholder="Search for scientific or common name"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-[75%]"
+            />
+            <Button type="button" onClick={queryResults} className="w-[20%]">
+              Search
+            </Button>
+          </div>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={(e: BaseSyntheticEvent) => void form.handleSubmit(onSubmit)(e)}>

@@ -1,9 +1,24 @@
-import { Separator } from "@/components/ui/separator";
-import { TypographyH2 } from "@/components/ui/typography";
+import type { Database } from "@/lib/schema";
 import { createServerSupabaseClient } from "@/lib/server-utils";
 import { redirect } from "next/navigation";
-import AddSpeciesDialog from "./add-species-dialog";
-import SpeciesCard from "./species-card";
+import SpeciesListChild from "./species-list";
+
+// custom type to allow for extended search on profiles
+export type Species = {
+  author: string;
+  common_name: string | null;
+  description: string | null;
+  endangered: boolean | null;
+  id: number;
+  image: string | null;
+  kingdom: Database["public"]["Enums"]["kingdom"];
+  scientific_name: string;
+  total_population: number | null;
+  profiles: {
+    biography: string | null;
+    display_name: string | null;
+  } | null;
+};
 
 export default async function SpeciesList() {
   // Create supabase server component client and obtain user session from stored cookie
@@ -20,18 +35,12 @@ export default async function SpeciesList() {
   // Obtain the ID of the currently signed-in user
   const sessionId = session.user.id;
 
-  const { data: species } = await supabase.from("species").select("*").order("id", { ascending: false });
+  // select info on all species & associated author
+  const { data: species } = await supabase
+    .from("species")
+    .select(`*, profiles!inner (display_name, biography)`)
+    .order("id", { ascending: false });
 
-  return (
-    <>
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-        <TypographyH2>Species List</TypographyH2>
-        <AddSpeciesDialog userId={sessionId} />
-      </div>
-      <Separator className="my-4" />
-      <div className="flex flex-wrap justify-center">
-        {species?.map((species) => <SpeciesCard key={species.id} species={species} />)}
-      </div>
-    </>
-  );
+  // render actual content in client component (for sorting & filtering)
+  return <SpeciesListChild sessionId={sessionId} species={species ?? []} />;
 }
