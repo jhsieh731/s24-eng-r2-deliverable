@@ -16,9 +16,6 @@ export default async function Users() {
     redirect("/");
   }
 
-  // Obtain the ID of the currently signed-in user
-  const sessionId = session.user.id;
-
   const { data: users } = await supabase.from("profiles").select("*").order("id", { ascending: false });
   return (
     <>
@@ -39,7 +36,7 @@ export default async function Users() {
           </TableHeader>
           <TableBody>
             {users?.map((user) => (
-              <TableRow>
+              <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.email}</TableCell>
                 <TableCell>{user.display_name}</TableCell>
                 <TableCell className="text-right">{user.biography}</TableCell>

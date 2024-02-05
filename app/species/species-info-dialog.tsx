@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { useState, type BaseSyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Species } from "../species/page";
+import type { Species } from "../species/page";
 
 // dropdown options
 const kingdoms = z.enum(["Animalia", "Plantae", "Fungi", "Protista", "Archaea", "Bacteria"]);
@@ -347,7 +347,11 @@ export default function SpeciesInfoDialog({ species, userId }: { species: Specie
               <Button className="ml-1 mr-1 flex-auto" onClick={() => setEdit(true)}>
                 Edit
               </Button>
-              <Button className="ml-1 mr-1 flex-auto" variant="destructive" onClick={() => handleDelete(species.id)}>
+              <Button
+                className="ml-1 mr-1 flex-auto"
+                variant="destructive"
+                onClick={() => void handleDelete(species.id)}
+              >
                 Delete
               </Button>
             </div>

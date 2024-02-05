@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import SpeciesListChild from "./species-list";
 
 // custom type to allow for extended search on profiles
-export type Species = {
+export interface Species {
   author: string;
   common_name: string | null;
   description: string | null;
@@ -18,7 +18,7 @@ export type Species = {
     biography: string | null;
     display_name: string | null;
   } | null;
-};
+}
 
 export default async function SpeciesList() {
   // Create supabase server component client and obtain user session from stored cookie

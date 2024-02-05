@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { TypographyH2 } from "@/components/ui/typography";
 import { useEffect, useState } from "react";
 import AddSpeciesDialog from "./add-species-dialog";
-import { Species } from "./page";
+import type { Species } from "./page";
 import SpeciesCard from "./species-card";
 
 const kingdoms = ["Animalia", "Plantae", "Fungi", "Protista", "Archaea", "Bacteria"];
@@ -49,9 +49,9 @@ export default function SpeciesListChild({ sessionId, species }: { sessionId: st
     console.log(filterVal);
     const filteredData = species.filter(
       (species) =>
-        species.common_name?.toLowerCase().includes(filterVal) ||
+        (species.common_name?.toLowerCase().includes(filterVal) ||
         species.scientific_name?.toLowerCase().includes(filterVal) ||
-        species.description?.toLowerCase().includes(filterVal),
+        species.description?.toLowerCase().includes(filterVal))
     );
 
     const filterByKingdom =
@@ -59,7 +59,7 @@ export default function SpeciesListChild({ sessionId, species }: { sessionId: st
 
     const sortedData = sortHelper(filterByKingdom, sort);
     setSpeciesData(sortedData);
-  }, [sort, kingdom, filter]);
+  }, [sort, kingdom, filter, species]);
 
   return (
     <>

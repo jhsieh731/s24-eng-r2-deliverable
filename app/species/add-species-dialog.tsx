@@ -71,6 +71,13 @@ const defaultValues: Partial<FormData> = {
   description: null,
 };
 
+interface fetchResult {
+  thumbnail: {
+    source: string;
+  };
+  description: string;
+}
+
 export default function AddSpeciesDialog({ userId }: { userId: string }) {
   const router = useRouter();
 
@@ -84,10 +91,9 @@ export default function AddSpeciesDialog({ userId }: { userId: string }) {
   const queryResults = async () => {
     try {
       await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}?redirect=true`)
-        .then((res) => res.json() as Promise<any>)
+        .then((res) => res.json() as Promise<fetchResult>)
         .then((data) => {
           console.log(data);
-          // tslint:disable-next-line
           form.setValue("image", data.thumbnail.source);
           form.setValue("description", data.description);
         });
@@ -171,7 +177,7 @@ export default function AddSpeciesDialog({ userId }: { userId: string }) {
               onChange={(e) => setQuery(e.target.value)}
               className="w-[75%]"
             />
-            <Button type="button" onClick={queryResults} className="w-[20%]">
+            <Button type="button" onClick={() => void queryResults()} className="w-[20%]">
               Search
             </Button>
           </div>
